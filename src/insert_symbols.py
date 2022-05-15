@@ -12,6 +12,7 @@ import aqt
 
 from anki.hooks import addHook, wrap
 from aqt import editor, browser, reviewer, utils, mw
+from aqt.editor import EditorWebView
 
 from .get_version import *
 from .symbol_manager import SymbolManager
@@ -41,12 +42,12 @@ ins_sym_webviews = {
     "reviewer": None
 }
 
-def _update_JS(webview):
+def _update_JS(webview: EditorWebView):
     """ Updates the symbol list in the Javascript file. """
     json = mw.ins_sym_manager.get_JSON()
     webview.eval("insert_symbols.setMatchList(%s)" % json)
 
-def _load_JS(webview):
+def _load_JS(webview: EditorWebView):
     """ 
     Loads replacer.js, the Javascript file which performs symbol replacement, 
     into the given WebView.

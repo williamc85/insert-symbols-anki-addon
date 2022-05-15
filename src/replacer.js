@@ -58,13 +58,35 @@ var insert_symbols = new function() {
      * Add event handlers to Editor key events. Setup only needs to be 
      * performed when the editor is first created.
      */
-    forEditorField([], (field) => {
-        if (!field.hasAttribute("has-type-symbols")) {
-            field.editingArea.editable.addEventListener("keydown", this.onKeyDown)
-            field.editingArea.editable.addEventListener("keyup", this.onKeyUp)
-            field.setAttribute("has-type-symbols", "")
-        }
-    })
+     if (typeof forEditorField !== 'undefined') {
+         // for Anki < 2.1.50
+         forEditorField([], (field) => {
+             if (!field.hasAttribute("has-type-symbols")) {
+                 field.editingArea.editable.addEventListener("keydown", this.onKeyDown)
+                 field.editingArea.editable.addEventListener("keyup", this.onKeyUp)
+                 field.setAttribute("has-type-symbols", "")
+             }
+         })
+     } else {
+         // for Anki >= 2.1.50
+         setTimeout(() => {
+             require("anki/ui").loaded.then(() => {
+                 fields = require("anki/NoteEditor").instances[0].fields
+                 for (const field of fields) {
+                     field.element.then((fieldElm) => {
+                         if (!fieldElm.hasAttribute("has-type-symbols")) {
+                             const editingArea = fieldElm.getElementsByClassName("editing-area")[0];
+                             const shadowRoot = editingArea.getElementsByClassName("rich-text-editable")[0].shadowRoot;
+                             const editable = shadowRoot.querySelector("anki-editable");
+                             editable.addEventListener("keydown", this.onKeyDown)
+                             editable.addEventListener("keyup", this.onKeyUp)
+                             fieldElm.setAttribute("has-type-symbols", "")
+                         }
+                     })
+                 }
+             })
+         })
+     }
 
     /**
      * Add event handlers to Reviewer key events to extend functionality to
